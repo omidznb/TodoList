@@ -10,7 +10,8 @@ let filtervalue = "all";
  const todoForm = document.querySelector(".todo-form");
  const todoList = document.querySelector(".todolist");
  const selectFilter = document.querySelector(".filter-todos")
-//  const editButton = document.querySelector(".todo__edit")
+ const editButton = document.querySelector("#btnEdit")
+ const modalInput = document.querySelector("#edit-todo");
  const modalWindows =document.querySelector(".modal")
 
 
@@ -21,10 +22,8 @@ document.addEventListener("DOMContentLoaded",(e) =>{
     creatTodos(todos)
 })
 
+editButton.addEventListener("click", editTodo);
 
-//  editButton.addEventListener("click",(e) => {
-//     modal.style.display ="block"
-//  })
 
  todoForm.addEventListener("submit",addNewTodo);
 
@@ -38,36 +37,36 @@ document.addEventListener("DOMContentLoaded",(e) =>{
 
  
 //function
- function addNewTodo (e){
-    const todos =getAllTodos();
-    e.preventDefault(); // to avoid of refreshing page
+function addNewTodo(e) {
+    e.preventDefault();
+  
+    if (!todoInput.value) return null;
+  
+    const newTodo = {
+      id: Date.now(),
+      createdAt: new Date().toISOString(),
+      title: todoInput.value,
+      isCompleted: false,
+    };
+  
+    // todos.push(newTodo);
+    saveTodo(newTodo);
+    filterTodos();
+    // console.log(newTodo);
+  }
+  
+  function editTodo(e) {
+    e.preventDefault()
+    const todos =  getAllTodos()
+    const todoId = Number(modalInput.id);
+    const todo = todos.find((t) => t.id === todoId);
+    todo.title = modalInput.value;
+    saveAllTodo(todos);
+    creatTodos(todos);
+    closeModal()
+  }
 
-    if(!todoInput.value) return null;
-    if (todo) {  
-        modalTitle.textContent = "ویرایش Todo"; // Edit title  
-        modalInput.value = todo.title; // Set input with the todo title  
-        currentEditId = todo.id; // Set the id of the todo to be edited  
-    } else {  
-        modalTitle.textContent = "اضافه کردن Todo"; // Add title  
-        modalInput.value = ""; // Clear input  
-        currentEditId = null; }// Reset to indicate a new todo  
     
-
-  const newTodo = {
-    id : Date.now(),
-    createdAt : new Date().toISOString(),
-    title : todoInput.value,
-    isCompleted : false 
-    
-  };
-
-//   todos.push(newTodo);
-
-
-  saveTodo(newTodo)
-  filterTodos(todos);
-
-}
 
 
 
@@ -99,9 +98,10 @@ function openEditModal(e) {
     todos = getAllTodos()
     const todoId = Number(e.target.dataset.todoId)
     const todo =todos.find((t) => t.id === todoId);
+    modalInput.value= todo.title
+    modalInput.id =todoId
     openModal()
-    filterTodos(todos)
-    saveAllTodo(todos)
+
     
 
 }
@@ -151,8 +151,8 @@ function checkTodo(e) {
    const todoId = Number(e.target.dataset.todoId)
     const todo =todos.find((t) => t.id === todoId);
     todo.isCompleted = !todo.isCompleted; 
-    filterTodos(todos)
-    console.log(todos);
+    creatTodos(todos)
+    console.log("checkTodos",todos);
     saveAllTodo(todos)
 }
 
@@ -171,7 +171,7 @@ function checkTodo(e) {
 
 function getAllTodos(){
  
-    const savedTodos = JSON.parse(localStorage.getItem("todos") || [])
+    const savedTodos = JSON.parse(localStorage.getItem("todos") )|| []
     return savedTodos ;
 }
 
@@ -179,6 +179,7 @@ function saveTodo(Todo) {
     const savedTodos = getAllTodos();
     savedTodos.push(Todo);
     localStorage.setItem("todos" , JSON.stringify(savedTodos));
+    
     return savedTodos;
     
 }
